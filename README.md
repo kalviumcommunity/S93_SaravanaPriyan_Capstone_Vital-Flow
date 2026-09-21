@@ -1,17 +1,19 @@
-# ⚡ Vital-Flow
+# React + Vite
 
-> *An intelligent orchestration and monitoring engine designed to streamline high-volume workflows, eliminate operational bottlenecks, and keep systems running with predictable efficiency.*
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
----
+Currently, two official plugins are available:
 
-## 🌟 Overview
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-Welcome to **Vital-Flow**—the central nervous system for dynamic data and resource management. Whether you're tracking fast-paced digital pipelines, supply chain logistics, or critical operational workflows, Vital-Flow bridges the gap between chaotic inputs and real-time decision-making.
+## React Compiler
 
-Instead of reacting to system failures after they happen, Vital-Flow monitors incoming streams, flags friction points instantly, and automates resource distribution so your team can focus on growth.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
----
+## Expanding the Oxlint configuration
 
+<<<<<<< Updated upstream
 ## 🚀 Key Features
 
 *   **Real-Time Bottleneck Detection:** Instantly identifies slow-downs and traffic jams across pipelines before they escalate into failures.
@@ -44,3 +46,6 @@ Vital-Flow acts as an automated bridge that monitors throughput, predicts system
 ## 💡 Creator's Vision
 
 > *"We didn't build Vital-Flow to be just another dashboard to stare at. We built it to think alongside your systems—taking the friction out of complex operations so you can focus on building and scaling."*
+=======
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+>>>>>>> Stashed changes
