@@ -37,7 +37,7 @@ Vital-Flow acts as an automated bridge that monitors throughput, predicts system
 
 *   📱 **Interactive Prototype:** https://www.figma.com/design/R1YFYxwBWD9viLxqQee3Pm/Project--Vital-Flow?node-id=0-1&t=YKM4S19cgAtVHto2-1
 
-* **Video Explaination** :  
+* **Video Explaination** : https://drive.google.com/file/d/1YvZ7KU1-aVik4YS73n--loxnl5j6fkoX/view?usp=sharing
 
 ---
 
