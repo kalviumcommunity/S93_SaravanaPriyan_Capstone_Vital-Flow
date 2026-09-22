@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActiveRouteImport } from './routes/active'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ApiPatientsRouteImport } from './routes/api/patients'
+import { Route as ApiPatientsPatientIdRouteImport } from './routes/api/patients/$patientId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +36,32 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPatientsRoute = ApiPatientsRouteImport.update({
+  id: '/api/patients',
+  path: '/api/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPatientsPatientIdRoute = ApiPatientsPatientIdRouteImport.update({
+  id: '/$patientId',
+  path: '/$patientId',
+  getParentRoute: () => ApiPatientsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
   '/settings': typeof SettingsRoute
+  '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
   '/settings': typeof SettingsRoute
+  '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,34 @@ export interface FileRoutesById {
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
   '/settings': typeof SettingsRoute
+  '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/active' | '/history' | '/settings'
+  fullPaths:
+    | '/'
+    | '/active'
+    | '/history'
+    | '/settings'
+    | '/api/patients'
+    | '/api/patients/$patientId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/active' | '/history' | '/settings'
-  id: '__root__' | '/' | '/active' | '/history' | '/settings'
+  to:
+    | '/'
+    | '/active'
+    | '/history'
+    | '/settings'
+    | '/api/patients'
+    | '/api/patients/$patientId'
+  id:
+    | '__root__'
+    | '/'
+    | '/active'
+    | '/history'
+    | '/settings'
+    | '/api/patients'
+    | '/api/patients/$patientId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +104,7 @@ export interface RootRouteChildren {
   ActiveRoute: typeof ActiveRoute
   HistoryRoute: typeof HistoryRoute
   SettingsRoute: typeof SettingsRoute
+  ApiPatientsRoute: typeof ApiPatientsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -99,14 +137,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/patients': {
+      id: '/api/patients'
+      path: '/api/patients'
+      fullPath: '/api/patients'
+      preLoaderRoute: typeof ApiPatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/patients/$patientId': {
+      id: '/api/patients/$patientId'
+      path: '/$patientId'
+      fullPath: '/api/patients/$patientId'
+      preLoaderRoute: typeof ApiPatientsPatientIdRouteImport
+      parentRoute: typeof ApiPatientsRoute
+    }
   }
 }
+
+interface ApiPatientsRouteChildren {
+  ApiPatientsPatientIdRoute: typeof ApiPatientsPatientIdRoute
+}
+
+const ApiPatientsRouteChildren: ApiPatientsRouteChildren = {
+  ApiPatientsPatientIdRoute: ApiPatientsPatientIdRoute,
+}
+
+const ApiPatientsRouteWithChildren = ApiPatientsRoute._addFileChildren(
+  ApiPatientsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActiveRoute: ActiveRoute,
   HistoryRoute: HistoryRoute,
   SettingsRoute: SettingsRoute,
+  ApiPatientsRoute: ApiPatientsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
