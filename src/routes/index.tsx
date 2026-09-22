@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Minus, Plus, Radio } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,9 +42,89 @@ function EmergencyRequestPage() {
   const [ward, setWard] = useState("");
   const [contact, setContact] = useState("+91 9845012300");
   const [notes, setNotes] = useState("");
+  const [patientLookup, setPatientLookup] = useState<
+    "idle" | "loading" | "found" | "not-found" | "error"
+  >("idle");
 
-  const submit = (e: React.FormEvent) => {
+  const lookupPatient = async () => {
+    const id = patientId.trim();
+    if (!id) {
+      setPatientLookup("idle");
+      return;
+    }
+
+    setPatientLookup("loading");
+    try {
+      const response = await fetch(`/api/patients/${encodeURIComponent(id)}`);
+      if (response.status === 404) {
+        setPatientLookup("not-found");
+        return;
+      }
+      if (!response.ok) {
+        throw new Error("Patient lookup failed");
+      }
+
+      const data = (await response.json()) as {
+        patient: { bloodGroup: BloodGroup; ward: string; contact: string; notes?: string };
+      };
+      setBloodGroup(data.patient.bloodGroup);
+      setWard(data.patient.ward);
+      setContact(data.patient.contact);
+      setNotes(data.patient.notes ?? "");
+      setPatientLookup("found");
+    } catch {
+      setPatientLookup("error");
+    }
+  };
+
+  const savePatient = async () => {
+    const id = patientId.trim();
+    if (!id) return true;
+
+    const payload = {
+      patientId: id,
+      bloodGroup,
+      ward: ward || "Emergency Desk",
+      contact,
+      notes,
+    };
+
+    try {
+      const existing = await fetch(`/api/patients/${encodeURIComponent(id)}`);
+      if (existing.ok) {
+        const response = await fetch(`/api/patients/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error("Patient update failed");
+        return true;
+      }
+
+      if (existing.status === 404) {
+        const response = await fetch("/api/patients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error("Patient creation failed");
+        return true;
+      }
+
+      throw new Error("Patient lookup failed");
+    } catch {
+      toast.error("Patient information could not be saved", {
+        description: "Check that MongoDB is running and try again.",
+      });
+      return false;
+    }
+  };
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const patientSaved = await savePatient();
+    if (!patientSaved) return;
+
     broadcast({
       bloodGroup,
       unitsNeeded: units,
@@ -141,9 +222,20 @@ function EmergencyRequestPage() {
               <Input
                 id="patient"
                 value={patientId}
-                onChange={(e) => setPatientId(e.target.value)}
+                onChange={(e) => {
+                  setPatientId(e.target.value);
+                  setPatientLookup("idle");
+                }}
+                onBlur={lookupPatient}
                 placeholder="PT-77120"
               />
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                {patientLookup === "loading" && "Checking MongoDB patient record…"}
+                {patientLookup === "found" && "Patient information loaded from MongoDB."}
+                {patientLookup === "not-found" &&
+                  "No MongoDB record found. Details entered here will be saved when you submit."}
+                {patientLookup === "error" && "Patient lookup failed. Check MongoDB and try again."}
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ward">Ward / Location</Label>
