@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test:get-api": "node scripts/verify-get-api.mjs",
-    "test:post-api": "node scripts/verify-post-api.mjs"
+    "test:database": "node scripts/verify-database-read-write.mjs",
+    "test:post-api": "node scripts/verify-post-api.mjs",
+    "test:put-api": "node scripts/verify-put-api.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
