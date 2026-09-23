@@ -1,57 +1,60 @@
 const baseUrl = process.env.API_URL ?? "http://localhost:3000";
+const patientId = `PT-POST-TEST-${Date.now()}`;
 
-async function readResponse(response) {
+async function request(path, options) {
+  const response = await fetch(`${baseUrl}${path}`, options);
   const text = await response.text();
+  let body = {};
+
   try {
-    return JSON.parse(text);
+    body = JSON.parse(text);
   } catch {
-    return text;
+    body = text;
   }
+
+  return { response, body };
 }
 
-const patientId = `PT-POST-${Date.now()}`;
-const payload = {
-  patientId,
-  bloodGroup: "O+",
-  ward: "General Ward",
-  contact: "9876543210",
-  notes: "POST API verification record",
-};
+try {
+  console.log(`Testing POST ${baseUrl}/api/patients`);
 
-console.log(`Testing POST ${baseUrl}/api/patients`);
+  const result = await request("/api/patients", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      patientId,
+      bloodGroup: "O+",
+      ward: "POST API Test Ward",
+      contact: "+91 9000000000",
+      notes: "POST API verification",
+    }),
+  });
 
-const response = await fetch(`${baseUrl}/api/patients`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(payload),
-});
+  if (result.response.status !== 201) {
+    throw new Error(
+      `POST /api/patients failed with ${result.response.status}: ${JSON.stringify(result.body)}`,
+    );
+  }
 
-const body = await readResponse(response);
+  if (result.body?.patient?.patientId !== patientId) {
+    throw new Error("POST /api/patients did not return the created patient.");
+  }
 
-if (response.status !== 201) {
-  throw new Error(
-    `POST /api/patients failed with ${response.status}: ${JSON.stringify(body)}`,
+  console.log(`PASS: POST /api/patients created ${patientId}.`);
+
+  const cleanup = await request(
+    `/api/patients/${encodeURIComponent(patientId)}`,
+    { method: "DELETE" },
   );
+
+  if (!cleanup.response.ok) {
+    console.warn(`WARNING: Test patient cleanup returned ${cleanup.response.status}.`);
+  } else {
+    console.log("PASS: Test patient cleaned up.");
+  }
+
+  console.log("POST API verification completed successfully.");
+} catch (error) {
+  console.error("POST API verification failed:", error.message);
+  process.exitCode = 1;
 }
-
-if (body?.patient?.patientId !== patientId) {
-  throw new Error("POST /api/patients did not return the created patient.");
-}
-
-console.log(`PASS: POST /api/patients created ${patientId}.`);
-
-console.log(`Cleaning up ${patientId}`);
-const deleteResponse = await fetch(
-  `${baseUrl}/api/patients/${encodeURIComponent(patientId)}`,
-  { method: "DELETE" },
-);
-
-if (!deleteResponse.ok) {
-  console.warn(
-    `WARNING: Created patient ${patientId}, but cleanup returned ${deleteResponse.status}.`,
-  );
-} else {
-  console.log(`PASS: Cleanup deleted ${patientId}.`);
-}
-
-console.log("POST API verification completed successfully.");
