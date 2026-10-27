@@ -31,6 +31,13 @@ const patientSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// One patient can have many blood requests. BloodRequest stores the actual reference.
+patientSchema.virtual("bloodRequests", {
+  ref: "BloodRequest",
+  localField: "_id",
+  foreignField: "patient",
+});
+
 export type Patient = InferSchemaType<typeof patientSchema>;
 
 export const PatientModel =
