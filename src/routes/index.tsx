@@ -125,15 +125,39 @@ function EmergencyRequestPage() {
     const patientSaved = await savePatient();
     if (!patientSaved) return;
 
-    broadcast({
+    const normalizedPatientId = patientId.trim();
+    const requestId = `REQ-${Date.now()}`;
+    const requestDetails = {
       bloodGroup,
       unitsNeeded: units,
       urgency,
-      patientId: patientId || "PT-UNASSIGNED",
+      patientId: normalizedPatientId || "PT-UNASSIGNED",
       ward: ward || "Emergency Desk",
       contact,
       notes,
-    });
+    };
+
+    // Persist a patient-to-blood-request relationship when a real patient ID is supplied.
+    if (normalizedPatientId) {
+      try {
+        const response = await fetch("/api/blood-requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...requestDetails, requestId }),
+        });
+        if (!response.ok) {
+          const data = (await response.json()) as { error?: string };
+          throw new Error(data.error ?? "Blood request could not be saved");
+        }
+      } catch (error) {
+        toast.error("Blood request could not be saved", {
+          description: error instanceof Error ? error.message : "Check MongoDB and try again.",
+        });
+        return;
+      }
+    }
+
+    broadcast(requestDetails);
     navigate({ to: "/active" });
   };
 
