@@ -18,6 +18,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiBloodRequestsRouteImport } from './routes/api/blood-requests'
 import { Route as ApiHospitalSettingsRouteImport } from './routes/api/hospital-settings'
 import { Route as ApiPatientsRouteImport } from './routes/api/patients'
+import { Route as ApiAuthGoogleRouteImport } from './routes/api/auth/google'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -69,6 +70,11 @@ const ApiPatientsRoute = ApiPatientsRouteImport.update({
   path: '/api/patients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthGoogleRoute = ApiAuthGoogleRouteImport.update({
+  id: '/api/auth/google',
+  path: '/api/auth/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
   id: '/api/auth/login',
   path: '/api/auth/login',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/api/blood-requests': typeof ApiBloodRequestsRoute
   '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/api/blood-requests': typeof ApiBloodRequestsRoute
   '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/api/blood-requests': typeof ApiBloodRequestsRoute
   '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/blood-requests'
     | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/google'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/api/blood-requests'
     | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/google'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/api/blood-requests'
     | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/google'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   ApiBloodRequestsRoute: typeof ApiBloodRequestsRoute
   ApiHospitalSettingsRoute: typeof ApiHospitalSettingsRoute
   ApiPatientsRoute: typeof ApiPatientsRouteWithChildren
+  ApiAuthGoogleRoute: typeof ApiAuthGoogleRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPatientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/google': {
+      id: '/api/auth/google'
+      path: '/api/auth/google'
+      fullPath: '/api/auth/google'
+      preLoaderRoute: typeof ApiAuthGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/login': {
       id: '/api/auth/login'
       path: '/api/auth/login'
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBloodRequestsRoute: ApiBloodRequestsRoute,
   ApiHospitalSettingsRoute: ApiHospitalSettingsRoute,
   ApiPatientsRoute: ApiPatientsRouteWithChildren,
+  ApiAuthGoogleRoute: ApiAuthGoogleRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
