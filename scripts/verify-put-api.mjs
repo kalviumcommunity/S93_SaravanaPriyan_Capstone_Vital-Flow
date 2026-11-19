@@ -34,7 +34,9 @@ async function request(url, options) {
 console.log(`Testing PUT ${baseUrl}/api/patients/${patientId}`);
 
 let createdByScript = false;
-const existing = await request(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`, { method: "GET" });
+const existing = await request(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`, {
+  method: "GET",
+});
 
 if (existing.response.status === 404) {
   const created = await request(`${baseUrl}/api/patients`, {
@@ -44,11 +46,15 @@ if (existing.response.status === 404) {
   });
 
   if (created.response.status !== 201) {
-    throw new Error(`Could not create verification patient: ${created.response.status}: ${JSON.stringify(created.body)}`);
+    throw new Error(
+      `Could not create verification patient: ${created.response.status}: ${JSON.stringify(created.body)}`,
+    );
   }
   createdByScript = true;
 } else if (!existing.response.ok) {
-  throw new Error(`Could not check patient ${patientId}: ${existing.response.status}: ${JSON.stringify(existing.body)}`);
+  throw new Error(
+    `Could not check patient ${patientId}: ${existing.response.status}: ${JSON.stringify(existing.body)}`,
+  );
 }
 
 const updated = await request(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`, {
@@ -58,19 +64,28 @@ const updated = await request(`${baseUrl}/api/patients/${encodeURIComponent(pati
 });
 
 if (updated.response.status !== 200) {
-  throw new Error(`PUT /api/patients/:patientId failed with ${updated.response.status}: ${JSON.stringify(updated.body)}`);
+  throw new Error(
+    `PUT /api/patients/:patientId failed with ${updated.response.status}: ${JSON.stringify(updated.body)}`,
+  );
 }
 
-if (updated.body?.patient?.bloodGroup !== updatePayload.bloodGroup || updated.body?.patient?.ward !== updatePayload.ward) {
+if (
+  updated.body?.patient?.bloodGroup !== updatePayload.bloodGroup ||
+  updated.body?.patient?.ward !== updatePayload.ward
+) {
   throw new Error("PUT /api/patients/:patientId did not return the updated patient data.");
 }
 
 console.log(`PASS: PUT /api/patients/${patientId} updated the patient.`);
 
 if (createdByScript) {
-  const deleted = await request(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`, { method: "DELETE" });
+  const deleted = await request(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`, {
+    method: "DELETE",
+  });
   if (!deleted.response.ok) {
-    console.warn(`WARNING: Verification patient ${patientId} could not be cleaned up (${deleted.response.status}).`);
+    console.warn(
+      `WARNING: Verification patient ${patientId} could not be cleaned up (${deleted.response.status}).`,
+    );
   } else {
     console.log(`PASS: Cleanup deleted ${patientId}.`);
   }

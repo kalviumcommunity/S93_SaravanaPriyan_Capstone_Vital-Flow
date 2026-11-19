@@ -42,10 +42,9 @@ try {
 
   console.log(`PASS: POST /api/patients created ${patientId}.`);
 
-  const cleanup = await request(
-    `/api/patients/${encodeURIComponent(patientId)}`,
-    { method: "DELETE" },
-  );
+  const cleanup = await request(`/api/patients/${encodeURIComponent(patientId)}`, {
+    method: "DELETE",
+  });
 
   if (!cleanup.response.ok) {
     console.warn(`WARNING: Test patient cleanup returned ${cleanup.response.status}.`);

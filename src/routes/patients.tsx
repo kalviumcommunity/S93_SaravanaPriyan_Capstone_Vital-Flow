@@ -120,7 +120,10 @@ function PatientsPage() {
         )}
 
         {editingId && (
-          <form onSubmit={updatePatient} className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+          <form
+            onSubmit={updatePatient}
+            className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+          >
             <div className="mb-4">
               <p className="stat-label">Update patient</p>
               <h2 className="font-display text-2xl font-bold">{editingId}</h2>
@@ -131,28 +134,47 @@ function PatientsPage() {
                 <select
                   id="bloodGroup"
                   value={form.bloodGroup}
-                  onChange={(event) => setForm({ ...form, bloodGroup: event.target.value as BloodGroup })}
+                  onChange={(event) =>
+                    setForm({ ...form, bloodGroup: event.target.value as BloodGroup })
+                  }
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  {BLOOD_GROUPS.map((group) => <option key={group}>{group}</option>)}
+                  {BLOOD_GROUPS.map((group) => (
+                    <option key={group}>{group}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="ward">Ward / Location</Label>
-                <Input id="ward" value={form.ward} onChange={(event) => setForm({ ...form, ward: event.target.value })} />
+                <Input
+                  id="ward"
+                  value={form.ward}
+                  onChange={(event) => setForm({ ...form, ward: event.target.value })}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="contact">Emergency contact</Label>
-                <Input id="contact" value={form.contact} onChange={(event) => setForm({ ...form, contact: event.target.value })} />
+                <Input
+                  id="contact"
+                  value={form.contact}
+                  onChange={(event) => setForm({ ...form, contact: event.target.value })}
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} rows={3} />
+                <Textarea
+                  id="notes"
+                  value={form.notes}
+                  onChange={(event) => setForm({ ...form, notes: event.target.value })}
+                  rows={3}
+                />
               </div>
             </div>
             <div className="mt-4 flex gap-2">
               <Button type="submit">Save Changes</Button>
-              <Button type="button" variant="outline" onClick={cancelEdit}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={cancelEdit}>
+                Cancel
+              </Button>
             </div>
           </form>
         )}
@@ -163,7 +185,9 @@ function PatientsPage() {
               <p className="stat-label">MongoDB records</p>
               <h2 className="font-display text-2xl font-bold">Patients</h2>
             </div>
-            <Button variant="outline" onClick={() => void loadPatients()}>Refresh</Button>
+            <Button variant="outline" onClick={() => void loadPatients()}>
+              Refresh
+            </Button>
           </div>
 
           {loading ? (
@@ -173,7 +197,10 @@ function PatientsPage() {
           ) : (
             <div className="space-y-3">
               {patients.map((patient) => (
-                <div key={patient.patientId} className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-center md:justify-between">
+                <div
+                  key={patient.patientId}
+                  className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-center md:justify-between"
+                >
                   <div>
                     <p className="font-semibold">{patient.patientId}</p>
                     <p className="text-sm text-muted-foreground">
@@ -182,8 +209,15 @@ function PatientsPage() {
                     {patient.notes && <p className="mt-1 text-sm">{patient.notes}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => startEdit(patient)}>Update</Button>
-                    <Button variant="destructive" onClick={() => void deletePatient(patient.patientId)}>Delete</Button>
+                    <Button variant="outline" onClick={() => startEdit(patient)}>
+                      Update
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => void deletePatient(patient.patientId)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}

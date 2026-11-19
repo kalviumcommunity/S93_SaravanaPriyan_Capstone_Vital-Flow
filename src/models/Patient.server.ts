@@ -41,5 +41,5 @@ patientSchema.virtual("bloodRequests", {
 export type Patient = InferSchemaType<typeof patientSchema>;
 
 export const PatientModel =
-  (mongoose.models.Patient as mongoose.Model<Patient> | undefined) ??
+  (mongoose.models["Patient"] as mongoose.Model<Patient> | undefined) ??
   mongoose.model<Patient>("Patient", patientSchema);
