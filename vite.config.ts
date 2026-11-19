@@ -9,4 +9,9 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [tsConfigPaths(), tanstackStart(), viteReact(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      external: ["firebase-admin"],
+    },
+  },
 });

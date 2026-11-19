@@ -10,8 +10,11 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 40,
     },
-    passwordHash: { type: String, required: true },
-    passwordSalt: { type: String, required: true },
+    // Make password fields optional for Google-authenticated users
+    passwordHash: { type: String },
+    passwordSalt: { type: String },
+    // Add an optional googleId to identify Google users
+    googleId: { type: String, unique: true, sparse: true },
   },
   { timestamps: true },
 );

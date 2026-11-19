@@ -1,4 +1,4 @@
-node_modules/
+git rm --cached service-account.jsonnode_modules/
 dist/
 .output/
 .vinxi/
