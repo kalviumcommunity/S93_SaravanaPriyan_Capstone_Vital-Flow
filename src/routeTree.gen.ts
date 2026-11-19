@@ -12,8 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActiveRouteImport } from './routes/active'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ApiBloodRequestsRouteImport } from './routes/api/blood-requests'
+import { Route as ApiHospitalSettingsRouteImport } from './routes/api/hospital-settings'
 import { Route as ApiPatientsRouteImport } from './routes/api/patients'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
 import { Route as ApiPatientsPatientIdRouteImport } from './routes/api/patients/$patientId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,14 +39,54 @@ const HistoryRoute = HistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatientsRoute = PatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBloodRequestsRoute = ApiBloodRequestsRouteImport.update({
+  id: '/api/blood-requests',
+  path: '/api/blood-requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHospitalSettingsRoute = ApiHospitalSettingsRouteImport.update({
+  id: '/api/hospital-settings',
+  path: '/api/hospital-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPatientsRoute = ApiPatientsRouteImport.update({
   id: '/api/patients',
   path: '/api/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRegisterRoute = ApiAuthRegisterRouteImport.update({
+  id: '/api/auth/register',
+  path: '/api/auth/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPatientsPatientIdRoute = ApiPatientsPatientIdRouteImport.update({
@@ -51,16 +99,32 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/patients': typeof PatientsRoute
   '/settings': typeof SettingsRoute
+  '/api/blood-requests': typeof ApiBloodRequestsRoute
+  '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/patients': typeof PatientsRoute
   '/settings': typeof SettingsRoute
+  '/api/blood-requests': typeof ApiBloodRequestsRoute
+  '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRoutesById {
@@ -68,8 +132,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/active': typeof ActiveRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/patients': typeof PatientsRoute
   '/settings': typeof SettingsRoute
+  '/api/blood-requests': typeof ApiBloodRequestsRoute
+  '/api/hospital-settings': typeof ApiHospitalSettingsRoute
   '/api/patients': typeof ApiPatientsRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/patients/$patientId': typeof ApiPatientsPatientIdRoute
 }
 export interface FileRouteTypes {
@@ -78,24 +150,48 @@ export interface FileRouteTypes {
     | '/'
     | '/active'
     | '/history'
+    | '/login'
+    | '/patients'
     | '/settings'
+    | '/api/blood-requests'
+    | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/register'
     | '/api/patients/$patientId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/active'
     | '/history'
+    | '/login'
+    | '/patients'
     | '/settings'
+    | '/api/blood-requests'
+    | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/register'
     | '/api/patients/$patientId'
   id:
     | '__root__'
     | '/'
     | '/active'
     | '/history'
+    | '/login'
+    | '/patients'
     | '/settings'
+    | '/api/blood-requests'
+    | '/api/hospital-settings'
     | '/api/patients'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/register'
     | '/api/patients/$patientId'
   fileRoutesById: FileRoutesById
 }
@@ -103,8 +199,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActiveRoute: typeof ActiveRoute
   HistoryRoute: typeof HistoryRoute
+  LoginRoute: typeof LoginRoute
+  PatientsRoute: typeof PatientsRoute
   SettingsRoute: typeof SettingsRoute
+  ApiBloodRequestsRoute: typeof ApiBloodRequestsRoute
+  ApiHospitalSettingsRoute: typeof ApiHospitalSettingsRoute
   ApiPatientsRoute: typeof ApiPatientsRouteWithChildren
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -130,6 +234,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patients': {
+      id: '/patients'
+      path: '/patients'
+      fullPath: '/patients'
+      preLoaderRoute: typeof PatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -137,11 +255,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/blood-requests': {
+      id: '/api/blood-requests'
+      path: '/api/blood-requests'
+      fullPath: '/api/blood-requests'
+      preLoaderRoute: typeof ApiBloodRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hospital-settings': {
+      id: '/api/hospital-settings'
+      path: '/api/hospital-settings'
+      fullPath: '/api/hospital-settings'
+      preLoaderRoute: typeof ApiHospitalSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/patients': {
       id: '/api/patients'
       path: '/api/patients'
       fullPath: '/api/patients'
       preLoaderRoute: typeof ApiPatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/register': {
+      id: '/api/auth/register'
+      path: '/api/auth/register'
+      fullPath: '/api/auth/register'
+      preLoaderRoute: typeof ApiAuthRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/patients/$patientId': {
@@ -170,8 +330,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActiveRoute: ActiveRoute,
   HistoryRoute: HistoryRoute,
+  LoginRoute: LoginRoute,
+  PatientsRoute: PatientsRoute,
   SettingsRoute: SettingsRoute,
+  ApiBloodRequestsRoute: ApiBloodRequestsRoute,
+  ApiHospitalSettingsRoute: ApiHospitalSettingsRoute,
   ApiPatientsRoute: ApiPatientsRouteWithChildren,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiAuthRegisterRoute: ApiAuthRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

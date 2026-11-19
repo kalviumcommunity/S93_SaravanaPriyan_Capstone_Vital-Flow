@@ -33,10 +33,10 @@ export const Route = createFileRoute("/api/patients/$patientId")({
         try {
           const body = (await request.json()) as Record<string, unknown>;
           const patient = await updatePatient(params.patientId, {
-            bloodGroup: String(body.bloodGroup ?? ""),
-            ward: String(body.ward ?? ""),
-            contact: String(body.contact ?? ""),
-            ...(typeof body.notes === "string" ? { notes: body.notes } : {}),
+            bloodGroup: String(body["bloodGroup"] ?? ""),
+            ward: String(body["ward"] ?? ""),
+            contact: String(body["contact"] ?? ""),
+            ...(typeof body["notes"] === "string" ? { notes: body["notes"] } : {}),
           });
           if (!patient) {
             return Response.json({ error: "Patient not found." }, { status: 404 });

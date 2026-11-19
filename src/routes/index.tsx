@@ -114,7 +114,7 @@ function EmergencyRequestPage() {
       throw new Error("Patient lookup failed");
     } catch {
       toast.error("Patient information could not be saved", {
-        description: "Check that MongoDB is running and try again.",
+        description: "Check your MongoDB Atlas connection and try again.",
       });
       return false;
     }
@@ -122,43 +122,37 @@ function EmergencyRequestPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const normalizedPatientId = patientId.trim();
+    if (!normalizedPatientId) {
+      toast.error("Patient ID is required", {
+        description: "Enter a patient ID so the blood request can be linked and saved in MongoDB.",
+      });
+      return;
+    }
+
     const patientSaved = await savePatient();
     if (!patientSaved) return;
 
-    const normalizedPatientId = patientId.trim();
-    const requestId = `REQ-${Date.now()}`;
     const requestDetails = {
       bloodGroup,
       unitsNeeded: units,
       urgency,
-      patientId: normalizedPatientId || "PT-UNASSIGNED",
+      patientId: normalizedPatientId,
       ward: ward || "Emergency Desk",
       contact,
       notes,
     };
 
-    // Persist a patient-to-blood-request relationship when a real patient ID is supplied.
-    if (normalizedPatientId) {
-      try {
-        const response = await fetch("/api/blood-requests", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...requestDetails, requestId }),
-        });
-        if (!response.ok) {
-          const data = (await response.json()) as { error?: string };
-          throw new Error(data.error ?? "Blood request could not be saved");
-        }
-      } catch (error) {
-        toast.error("Blood request could not be saved", {
-          description: error instanceof Error ? error.message : "Check MongoDB and try again.",
-        });
-        return;
-      }
+    try {
+      await broadcast(requestDetails);
+      toast.success("Blood request saved to MongoDB.");
+      navigate({ to: "/active" });
+    } catch (error) {
+      toast.error("Blood request could not be saved", {
+        description: error instanceof Error ? error.message : "Check MongoDB and try again.",
+      });
     }
-
-    broadcast(requestDetails);
-    navigate({ to: "/active" });
   };
 
   return (
@@ -297,8 +291,7 @@ function EmergencyRequestPage() {
               </span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              {URGENCY_META[urgency].dot} {URGENCY_META[urgency].label} ·{" "}
-              {ward || "Emergency Desk"}
+              {URGENCY_META[urgency].dot} {URGENCY_META[urgency].label} · {ward || "Emergency Desk"}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
               Broadcasting matches nearby eligible donors and sends each of them a push alert. Call

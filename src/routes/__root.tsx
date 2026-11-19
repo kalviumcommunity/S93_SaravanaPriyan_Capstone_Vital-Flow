@@ -4,10 +4,12 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { HospitalProvider } from "../lib/hospital-store";
@@ -125,12 +127,49 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
+  const isLoginPage = location.pathname === "/login";
+
+  useEffect(() => {
+    let active = true;
+    if (isLoginPage) {
+      setAuthChecked(true);
+      return () => {
+        active = false;
+      };
+    }
+    fetch("/api/auth/me")
+      .then((response) => {
+        if (!response.ok) throw new Error("Not authenticated");
+        return response.json();
+      })
+      .then(() => {
+        if (active) setAuthChecked(true);
+      })
+      .catch(() => {
+        if (active) {
+          setAuthChecked(true);
+          void navigate({ to: "/login", replace: true });
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [isLoginPage, location.pathname, navigate]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <HospitalProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        {/* Keep the existing application tree intact; require a valid session before showing app routes. */}
+        {isLoginPage || authChecked ? (
+          <Outlet />
+        ) : (
+          <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
+            Checking your session...
+          </div>
+        )}
         <Toaster position="top-right" richColors />
       </HospitalProvider>
     </QueryClientProvider>

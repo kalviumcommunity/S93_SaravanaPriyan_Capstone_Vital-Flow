@@ -1,9 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  createPatient,
-  listPatients,
-  PatientValidationError,
-} from "@/server/patients.server";
+import { createPatient, listPatients, PatientValidationError } from "@/server/patients.server";
 
 function errorResponse(error: unknown) {
   if (error instanceof PatientValidationError) {
@@ -33,11 +29,11 @@ export const Route = createFileRoute("/api/patients")({
         try {
           const body = (await request.json()) as Record<string, unknown>;
           const input = {
-            patientId: String(body.patientId ?? ""),
-            bloodGroup: String(body.bloodGroup ?? ""),
-            ward: String(body.ward ?? ""),
-            contact: String(body.contact ?? ""),
-            ...(typeof body.notes === "string" ? { notes: body.notes } : {}),
+            patientId: String(body["patientId"] ?? ""),
+            bloodGroup: String(body["bloodGroup"] ?? ""),
+            ward: String(body["ward"] ?? ""),
+            contact: String(body["contact"] ?? ""),
+            ...(typeof body["notes"] === "string" ? { notes: body["notes"] } : {}),
           };
           const patient = await createPatient(input);
           return Response.json({ patient }, { status: 201 });

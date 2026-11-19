@@ -86,10 +86,7 @@ export async function createPatient(input: PatientInput) {
   return serializePatient(patient.toObject() as PatientRecord);
 }
 
-export async function updatePatient(
-  patientId: string,
-  input: Omit<PatientInput, "patientId">,
-) {
+export async function updatePatient(patientId: string, input: Omit<PatientInput, "patientId">) {
   const normalizedId = patientId.trim();
   if (!/^PT-[A-Za-z0-9-]+$/.test(normalizedId)) {
     throw new PatientValidationError("Invalid patient ID.");

@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -9,8 +10,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 import {
-  SEED_HISTORY,
-  SEED_REQUESTS,
   makeDonors,
   newRequestId,
   type BloodGroup,
@@ -31,127 +30,161 @@ interface NewRequestInput {
 interface Store {
   active: BloodRequest[];
   history: BloodRequest[];
-  broadcast: (input: NewRequestInput) => string;
+  broadcast: (input: NewRequestInput) => Promise<string>;
   rePush: (requestId: string, donorId: string) => void;
   simulateApproval: (requestId: string, donorId: string) => void;
   markReceived: (requestId: string, donorId: string) => void;
   cancelRequest: (requestId: string) => void;
 }
 
+type ApiRequest = BloodRequest & { requestId?: string };
+
 const HospitalContext = createContext<Store | null>(null);
 
+async function updateRequestOnServer(
+  requestId: string,
+  action: "repush" | "approve" | "received" | "cancel",
+  donorId?: string,
+): Promise<ApiRequest> {
+  const response = await fetch("/api/blood-requests", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requestId, action, donorId }),
+  });
+  const body = (await response.json()) as { request?: ApiRequest; error?: string };
+  if (!response.ok || !body.request) {
+    throw new Error(body.error ?? "Could not update the blood request.");
+  }
+  return body.request;
+}
+
 export function HospitalProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState<BloodRequest[]>(SEED_REQUESTS);
-  const [history, setHistory] = useState<BloodRequest[]>(SEED_HISTORY);
+  const [active, setActive] = useState<BloodRequest[]>([]);
+  const [history, setHistory] = useState<BloodRequest[]>([]);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const updateRequest = useCallback(
-    (requestId: string, fn: (r: BloodRequest) => BloodRequest) => {
-      setActive((prev) => prev.map((r) => (r.id === requestId ? fn(r) : r)));
-    },
-    [],
-  );
+  useEffect(() => {
+    let cancelled = false;
+    const activeTimers = timers.current;
 
-  const approveDonor = useCallback(
-    (requestId: string, donorId: string) => {
-      updateRequest(requestId, (r) => {
-        const donors = r.donors.map((d) =>
-          d.id === donorId
-            ? {
-                ...d,
-                state: "APPROVED" as const,
-                etaMinutes: Math.max(6, Math.round(d.distanceKm * 4)),
-              }
-            : d,
+    fetch("/api/blood-requests")
+      .then(async (response) => {
+        const body = (await response.json()) as {
+          requests?: ApiRequest[];
+          error?: string;
+        };
+        if (!response.ok) throw new Error(body.error ?? "Could not load blood requests.");
+        return body.requests ?? [];
+      })
+      .then((requests) => {
+        if (cancelled) return;
+        setActive(
+          requests.filter((request) => !["FULFILLED", "CANCELLED"].includes(request.state)),
         );
-        const approvedDonor = donors.find((d) => d.id === donorId);
-        if (approvedDonor) {
-          toast.success(`${approvedDonor.name} approved the request`, {
-            description: `Call & fulfil controls unlocked · ETA ${approvedDonor.etaMinutes} mins`,
-          });
+        setHistory(
+          requests.filter((request) => ["FULFILLED", "CANCELLED"].includes(request.state)),
+        );
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          console.error("Blood request loading failed:", error);
+          toast.error("Could not load blood requests from MongoDB.");
         }
-        return { ...r, donors, state: r.state === "SEARCHING" ? "APPROVED" : r.state };
       });
-    },
-    [updateRequest],
-  );
 
-  const broadcast = useCallback(
-    (input: NewRequestInput) => {
-      const id = newRequestId();
-      const request: BloodRequest = {
-        id,
-        createdAt: new Date().toISOString(),
+    return () => {
+      cancelled = true;
+      activeTimers.forEach(clearTimeout);
+    };
+  }, []);
+
+  const broadcast = useCallback(async (input: NewRequestInput) => {
+    const requestId = newRequestId();
+    const donors = makeDonors(input.bloodGroup, 3 + Math.floor(Math.random() * 2));
+    const response = await fetch("/api/blood-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         ...input,
+        requestId,
         state: "SEARCHING",
-        donors: makeDonors(input.bloodGroup, 3 + Math.floor(Math.random() * 2)),
-      };
-      setActive((prev) => [request, ...prev]);
+        donors,
+      }),
+    });
+    const body = (await response.json()) as { request?: ApiRequest; error?: string };
+    if (!response.ok || !body.request) {
+      throw new Error(body.error ?? "Blood request could not be saved to MongoDB.");
+    }
 
-      // Simulated donor responses arriving from the mobile app.
-      const first = request.donors[0];
-      if (first) {
-        timers.current.push(setTimeout(() => approveDonor(id, first.id), 7000));
-      }
-      return id;
-    },
-    [approveDonor],
-  );
+    const savedRequest = body.request;
+    setActive((previous) => [savedRequest, ...previous]);
 
-  const rePush = useCallback(
-    (requestId: string, donorId: string) => {
-      updateRequest(requestId, (r) => ({
-        ...r,
-        donors: r.donors.map((d) =>
-          d.id === donorId ? { ...d, pushCount: d.pushCount + 1, state: "MATCHED" } : d,
-        ),
-      }));
+    const firstDonor = savedRequest.donors[0];
+    if (firstDonor) {
+      timers.current.push(
+        setTimeout(() => {
+          void updateRequestOnServer(savedRequest.id, "approve", firstDonor.id)
+            .then((updated) => {
+              setActive((previous) =>
+                previous.map((item) => (item.id === updated.id ? updated : item)),
+              );
+            })
+            .catch((error: unknown) => console.error("Donor simulation failed:", error));
+        }, 7000),
+      );
+    }
+
+    return savedRequest.id;
+  }, []);
+
+  const rePush = useCallback(async (requestId: string, donorId: string) => {
+    try {
+      const updated = await updateRequestOnServer(requestId, "repush", donorId);
+      setActive((previous) => previous.map((item) => (item.id === requestId ? updated : item)));
       toast("Push notification re-sent", {
         description: "Waiting for the donor to tap Approve on their phone.",
       });
-    },
-    [updateRequest],
-  );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not resend notification.");
+    }
+  }, []);
 
-  const markReceived = useCallback(
-    (requestId: string, donorId: string) => {
-      let completed: BloodRequest | undefined;
-      setActive((prev) => {
-        const next = prev.map((r) => {
-          if (r.id !== requestId) return r;
-          const donors = r.donors.map((d) =>
-            d.id === donorId ? { ...d, state: "DONATED" as const } : d,
-          );
-          const units = donors.filter((d) => d.state === "DONATED").length;
-          const updated: BloodRequest = {
-            ...r,
-            donors,
-            state: units >= r.unitsNeeded ? "FULFILLED" : r.state,
-          };
-          if (updated.state === "FULFILLED") completed = updated;
-          return updated;
-        });
-        return next.filter((r) => r.state !== "FULFILLED");
-      });
-      if (completed) {
-        setHistory((h) => [completed as BloodRequest, ...h]);
-        toast.success("Request fulfilled and logged to history");
+  const simulateApproval = useCallback(async (requestId: string, donorId: string) => {
+    try {
+      const updated = await updateRequestOnServer(requestId, "approve", donorId);
+      setActive((previous) => previous.map((item) => (item.id === requestId ? updated : item)));
+      const donor = updated.donors.find((item) => item.id === donorId);
+      if (donor) toast.success(`${donor.name} approved the request`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update donor approval.");
+    }
+  }, []);
+
+  const markReceived = useCallback(async (requestId: string, donorId: string) => {
+    try {
+      const updated = await updateRequestOnServer(requestId, "received", donorId);
+      if (updated.state === "FULFILLED") {
+        setActive((previous) => previous.filter((item) => item.id !== requestId));
+        setHistory((previous) => [updated, ...previous.filter((item) => item.id !== requestId)]);
+        toast.success("Request fulfilled and saved to history");
       } else {
+        setActive((previous) => previous.map((item) => (item.id === requestId ? updated : item)));
         toast.success("Unit received from donor");
       }
-    },
-    [],
-  );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save received unit.");
+    }
+  }, []);
 
-  const cancelRequest = useCallback((requestId: string) => {
-    setActive((prev) => {
-      const target = prev.find((r) => r.id === requestId);
-      if (target) {
-        setHistory((h) => [{ ...target, state: "CANCELLED" }, ...h]);
-      }
-      return prev.filter((r) => r.id !== requestId);
-    });
-    toast("Request cancelled", { description: "Matched donors have been notified." });
+  const cancelRequest = useCallback(async (requestId: string) => {
+    try {
+      const updated = await updateRequestOnServer(requestId, "cancel");
+      setActive((previous) => previous.filter((item) => item.id !== requestId));
+      setHistory((previous) => [updated, ...previous.filter((item) => item.id !== requestId)]);
+      toast("Request cancelled", { description: "The cancellation was saved to MongoDB." });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not cancel request.");
+    }
   }, []);
 
   const value = useMemo<Store>(
@@ -160,11 +193,11 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
       history,
       broadcast,
       rePush,
-      simulateApproval: approveDonor,
+      simulateApproval,
       markReceived,
       cancelRequest,
     }),
-    [active, history, broadcast, rePush, approveDonor, markReceived, cancelRequest],
+    [active, history, broadcast, rePush, simulateApproval, markReceived, cancelRequest],
   );
 
   return <HospitalContext.Provider value={value}>{children}</HospitalContext.Provider>;

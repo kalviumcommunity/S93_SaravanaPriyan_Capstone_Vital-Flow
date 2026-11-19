@@ -1,149 +1,108 @@
-# Vital-Flow
+# LifeLine Hospital Console
 
-## Project Overview
+A TanStack Start + React + TypeScript hospital console for emergency blood requests and live donor approval.
 
-**Vital-Flow** is a healthcare-focused project designed to provide a simple and user-friendly solution for managing and accessing essential health-related information.
+## 1. Install and configure
 
-The project focuses on creating a clean user experience and organizing the required features in a structured way.
+You need Node.js 22+ and npm.
 
-## Problem Statement
-
-Managing healthcare information and accessing essential health services can sometimes be difficult because information may be scattered across different platforms.
-
-Vital-Flow aims to provide a more organized and user-friendly approach to make healthcare-related interactions easier and more accessible.
-
-## Objectives
-
-* Create a simple and user-friendly healthcare platform.
-* Improve accessibility to important healthcare information.
-* Provide an organized user experience.
-* Design an intuitive and responsive interface.
-* Build the project using modern web development technologies.
-
-## Features
-
-* User-friendly interface
-* Healthcare-related information management
-* Simple navigation
-* Responsive UI design
-* Organized and accessible information
-* Scalable project structure
-
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-
-## UX Design
-
-The initial user experience and interface design were created using **Figma**.
-
-The design focuses on:
-
-* Simple navigation
-* Clear information presentation
-* Easy-to-use interface
-* Consistent layout
-* User-friendly interactions
----
-
-## 🚀 Prototype & Links
-
-*   📱 **Interactive Prototype:** https://www.figma.com/design/R1YFYxwBWD9viLxqQee3Pm/Project--Vital-Flow?node-id=0-1&t=YKM4S19cgAtVHto2-1
-
-* **Video Explaination** : https://drive.google.com/file/d/1YvZ7KU1-aVik4YS73n--loxnl5j6fkoX/view?usp=sharing
-
----
-## Technologies Used
-
-* HTML
-* CSS
-* JavaScript
-* Node.js
-* Express.js
-* Git
-* GitHub
-* Figma
-
-## Project Structure
-
-```text
-Vital-Flow/
-│
-├── README.md
-├── frontend/
-├── backend/
-├── assets/
-└── ...
+```powershell
+npm install
 ```
 
-## Team
+Copy `.env.example` to `.env` in the project root. In `.env`, add your MongoDB Atlas connection string and a new private session secret.
 
-**Project:** Vital-Flow
-**Student:** S93 Saravana Priyan
+Example structure (replace the placeholders; do not share this file):
 
-## Development Workflow
-
-The project is developed using Git and GitHub with feature branches.
-
-Example workflow:
-
-```bash
-git checkout -b feature/mock-ux-design
-git add .
-git commit -m "Add mock UX design"
-git push origin feature/mock-ux-design
+```env
+MONGODB_URI=mongodb+srv://DB_USERNAME:URL_ENCODED_PASSWORD@cluster0.vkif1y4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_DATABASE=lifeline_hospital
+AUTH_SESSION_SECRET=your_private_random_secret_at_least_32_characters
 ```
 
-After completing a feature, a Pull Request is created for review before merging it into the main branch.
+The app explicitly selects the `lifeline_hospital` database through `MONGODB_DATABASE`, even when the Atlas URI has no database name after `.net/`.
 
-## Future Improvements
+In MongoDB Atlas, make sure:
 
-* Add user authentication
-* Add database integration
-* Improve healthcare data management
-* Add additional healthcare features
-* Improve accessibility and responsiveness
-* Deploy the application online
+- Your database user has read/write access to `lifeline_hospital`.
+- Network Access allows your current public IP address.
+- The username and password are the Atlas **database user** credentials, not your Atlas website login.
+- If the password contains special characters, URL-encode it before putting it in the URI.
 
-## License
+Generate a session secret in PowerShell:
 
-This project is developed for educational and academic purposes.
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-## 🚀 Key Features
+Keep `.env` private. It is ignored by Git.
 
-*   **Real-Time Bottleneck Detection:** Instantly identifies slow-downs and traffic jams across pipelines before they escalate into failures.
-*   **Automated Resource Allocation:** Dynamically shifts workloads and resources where they are needed most, minimizing downtime.
-*   **Predictive Insights:** Utilizes historical flow patterns to forecast future congestion and help with proactive capacity planning.
-*   **Unified Dashboard:** Aggregates complex system metrics into a clean, easy-to-read interface for instant health checks.
+## 2. Test the Atlas connection
 
----
+Before starting the website, run:
 
-## 🎯 Core Use Case
+```powershell
+npm run test:mongodb
+```
 
-Vital-Flow acts as an automated bridge that monitors throughput, predicts system congestion, and orchestrates tasks seamlessly. It eliminates manual oversight in high-stress environments, ensuring smooth, uninterrupted operational flows.
+A successful test prints `SUCCESS: Connected to MongoDB Atlas`, the database name, and the cluster host. The script disconnects after the test.
 
----
+## 3. Start the application
 
-## 🛠️ Tech Stack & Architecture
+```powershell
+npm run dev
+```
 
-*(Coming Soon / Update with your specific technologies, e.g., Node.js, Express, PostgreSQL, React, etc.)*
+Open the local URL printed by Vite (normally http://localhost:3000).
 
----
+## 4. MongoDB-backed features
 
-## 🚀 Prototype & Links
+- Authentication: registration and login users are stored in MongoDB; passwords are hashed with Node.js `scrypt`.
+- Patients: list, create, retrieve, update, and delete operations use the `patients` collection.
+- Blood requests: create, list, donor simulation actions, cancellation, and completed history use the `bloodrequests` collection.
+- Relationships: each blood request stores a required MongoDB ObjectId reference to a patient.
 
-*   📱 **Interactive Prototype:** https://www.figma.com/design/R1YFYxwBWD9viLxqQee3Pm/Project--Vital-Flow?node-id=0-1&t=YKM4S19cgAtVHto2-1
+The donor names and responses in this project are simulated demo data. The app persists those demo donor states with each blood request; it does not connect to a real donor-notification service.
 
-* **Video Explaination** : https://drive.google.com/file/d/1YvZ7KU1-aVik4YS73n--loxnl5j6fkoX/view?usp=sharing
+## 5. API endpoints
 
----
+### Authentication
 
-## 💡 Creator's Vision
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 
-> *"We didn't build Vital-Flow to be just another dashboard to stare at. We built it to think alongside your systems—taking the friction out of complex operations so you can focus on building and scaling."*
+### Patients
+
+- `GET /api/patients`
+- `POST /api/patients`
+- `GET /api/patients/:patientId`
+- `PUT /api/patients/:patientId`
+- `DELETE /api/patients/:patientId`
+
+### Blood requests
+
+- `GET /api/blood-requests`
+- `POST /api/blood-requests`
+- `PATCH /api/blood-requests` — donor actions and cancellation
+
+## 6. Verify patient database operations
+
+Start the app in one terminal. In a second terminal, run:
+
+```powershell
+npm run test:database
+npm run test:get-api
+npm run test:post-api
+npm run test:put-api
+```
+
+These verification scripts create temporary patient records and clean them up where applicable.
+
+## 7. Production build
+
+```powershell
+npm run build
+npm run preview
+```

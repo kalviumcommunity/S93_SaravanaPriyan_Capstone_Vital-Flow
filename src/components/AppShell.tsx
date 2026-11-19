@@ -1,8 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Activity, Droplets, History, Settings, Siren } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Activity, Droplets, History, LogOut, Settings, Siren } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useHospital } from "@/lib/hospital-store";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
   { to: "/", label: "Emergency Request", icon: Siren },
@@ -21,6 +22,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const { active } = useHospital();
   const pending = active.reduce(
     (n, r) => n + r.donors.filter((d) => d.state === "MATCHED").length,
@@ -79,10 +81,24 @@ export function AppShell({
               <h1 className="font-display text-xl font-bold md:text-2xl">{title}</h1>
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-standard-soft px-3 py-1.5 text-xs font-semibold text-standard">
-              <span className="size-2 rounded-full bg-standard" />
-              Emergency Status: Online
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-standard-soft px-3 py-1.5 text-xs font-semibold text-standard">
+                <span className="size-2 rounded-full bg-standard" />
+                Emergency Status: Online
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  await navigate({ to: "/login", replace: true });
+                }}
+              >
+                <LogOut className="mr-2 size-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
           <nav className="mt-4 flex gap-2 overflow-x-auto md:hidden">
             {NAV.map(({ to, label }) => (

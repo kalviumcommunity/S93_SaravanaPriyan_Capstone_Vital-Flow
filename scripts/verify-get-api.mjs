@@ -18,7 +18,9 @@ async function getJson(url) {
 console.log(`Testing GET ${baseUrl}/api/patients`);
 const listResult = await getJson(`${baseUrl}/api/patients`);
 if (!listResult.response.ok) {
-  throw new Error(`GET /api/patients failed with ${listResult.response.status}: ${JSON.stringify(listResult.body)}`);
+  throw new Error(
+    `GET /api/patients failed with ${listResult.response.status}: ${JSON.stringify(listResult.body)}`,
+  );
 }
 
 if (!listResult.body || !Array.isArray(listResult.body.patients)) {
@@ -32,7 +34,9 @@ if (patientId) {
   const patientResult = await getJson(`${baseUrl}/api/patients/${encodeURIComponent(patientId)}`);
 
   if (!patientResult.response.ok) {
-    throw new Error(`GET /api/patients/${patientId} failed with ${patientResult.response.status}: ${JSON.stringify(patientResult.body)}`);
+    throw new Error(
+      `GET /api/patients/${patientId} failed with ${patientResult.response.status}: ${JSON.stringify(patientResult.body)}`,
+    );
   }
 
   if (!patientResult.body?.patient?.patientId) {
